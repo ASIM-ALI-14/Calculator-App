@@ -1,18 +1,19 @@
 package com.example.calculator.viewmodel
-import net.objecthunter.exp4j.ExpressionBuilder
-import net.objecthunter.exp4j.function.Function
-
 
 import androidx.lifecycle.ViewModel
 import com.example.calculator.model.CalculatorState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-
+import net.objecthunter.exp4j.ExpressionBuilder
+import net.objecthunter.exp4j.function.Function
 
 class CalculatorViewModel : ViewModel() {
 
     private val _state = MutableStateFlow(CalculatorState())
     val state = _state.asStateFlow()
+
+    private val _history = MutableStateFlow<List<Pair<String, String>>>(emptyList())
+    val history = _history.asStateFlow()
 
     private var justEvaluated = false
 
@@ -49,12 +50,32 @@ class CalculatorViewModel : ViewModel() {
                 if (current.isNotEmpty()) {
                     val newExpr = "($current)^2"
                     _state.value = currentState.copy(expression = newExpr)
-                    tryAutoEvaluate(newExpr)
+                    // force re-evaluation even if ending with ^2
+                    try {
+                        val exp = newExpr
+                            .replace("x", "*")
+                            .replace("÷", "/")
+                            .let { autoCloseParentheses(it) }
+
+                        val result = evalExpression(exp)
+                        _state.value = _state.value.copy(result = result)
+                    } catch (_: Exception) {
+                        _state.value = _state.value.copy(result = "")
+                    }
                 }
             }
 
+
             else -> {
                 val isOperator = input in listOf("+", "-", "x", "÷", "*", "/")
+
+                // ✅ Count only digits in the expression
+                val digitCount = currentState.expression.count { it.isDigit() }
+
+                // ✅ Prevent adding more than 30 digits
+                if (input.all { it.isDigit() } && digitCount >= 20) {
+                    return
+                }
 
                 val newExpression = when {
                     justEvaluated && input.first().isDigit() -> {
@@ -102,13 +123,15 @@ class CalculatorViewModel : ViewModel() {
                 .let { autoCloseParentheses(it) }
 
             val result = evalExpression(rawExpression)
-            val historyItem = "${currentState.expression} = $result"
+
+            val historyItem = currentState.expression to result
 
             _state.value = currentState.copy(
                 expression = result,
-                result = "",
-                history = listOf(historyItem) + currentState.history
+                result = ""
             )
+
+            _history.value = listOf(historyItem) + _history.value
 
             justEvaluated = true
 
@@ -126,7 +149,7 @@ class CalculatorViewModel : ViewModel() {
 
         val shouldEvaluate =
             endsCorrectly && (
-                    expression.contains(Regex("[+\\-*/÷x]")) ||
+                    expression.contains(Regex("[+\\-*/÷x^]")) ||
                             expression.contains("sqrt(")
                     )
 
@@ -147,7 +170,6 @@ class CalculatorViewModel : ViewModel() {
         }
     }
 
-
     private fun evalExpression(expression: String): String {
         val sqrtFunction = object : Function("sqrt", 1) {
             override fun apply(vararg args: Double): Double {
@@ -161,15 +183,12 @@ class CalculatorViewModel : ViewModel() {
 
         val result = expr.evaluate()
 
-        // Format to 3 decimal places
         return if (result % 1.0 == 0.0) {
             result.toInt().toString()
         } else {
             String.format("%.3f", result)
         }
     }
-
-
 
     private fun autoCloseParentheses(expr: String): String {
         val openCount = expr.count { it == '(' }

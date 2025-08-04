@@ -42,7 +42,7 @@ fun SingleButton(
 
     Box(
         modifier = Modifier
-            .padding(7.dp)
+            .padding(horizontal = 7.dp, vertical = 4.dp)
             .width(width)
             .height(height)
 
@@ -52,9 +52,9 @@ fun SingleButton(
                         isAntiAlias = true
                         color = android.graphics.Color.TRANSPARENT
                         setShadowLayer(
-                            20f, // blur radius
-                            5f, 7f, // x and y offset
-                            shadowColor.copy(alpha = 0.5f).toArgb()
+                            5f, // blur radius
+                            2f, 5f, // x and y offset
+                            shadowColor.copy(alpha = 0.7f).toArgb()
                         )
                     }
 

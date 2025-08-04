@@ -1,20 +1,44 @@
 package com.example.calculator.view
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -23,49 +47,106 @@ import com.example.calculator.viewmodel.CalculatorViewModel
 
 
 @Composable
-fun CalculatorScreen(viewModel1: CalculatorViewModel) {
-    val viewModel: CalculatorViewModel = CalculatorViewModel()
-    val state by viewModel.state.collectAsState()
+fun CalculatorScreen(
+    viewModel1: CalculatorViewModel,
+    isDarkMode: Boolean,
+    onToggleTheme: () -> Unit
+) {
+    val backgroundBrush = if (isDarkMode) {
+        Brush.verticalGradient(
+            colors = listOf(
+                Color(0xA4494D4D),
+                Color(0x792C2D2F),
+                Color(0xFF080909)
+            )
+        )
+    } else {
+        Brush.verticalGradient(
+            colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary)
+        )
+    }
 
-    Surface(
-        modifier = Modifier.background(color = Color.White)
-            .fillMaxSize()
-            .padding(bottom = 45.dp, start = 10.dp, end = 10.dp, top = 16.dp),
+    val state by viewModel1.state.collectAsState()
+    val history by viewModel1.history.collectAsState()
+    var showHistory by remember { mutableStateOf(false) }
 
-    ) {
+    Surface(modifier = Modifier.fillMaxSize()) {
         Column(
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.End,
             modifier = Modifier
+                .background(brush = backgroundBrush)
+                .padding(bottom = 50.dp)
                 .fillMaxWidth()
-
         ) {
-
+            // Expression + Result
             Text(
                 text = state.expression,
-                style = TextStyle(fontSize = 32.sp), fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(bottom = 73.dp, top = 62.dp)
+                style = TextStyle(fontSize = 39.sp),
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier
+                    .padding(bottom = 63.dp, top = 72.dp, end = 16.dp)
+                    .align(Alignment.End),
+                color = MaterialTheme.colorScheme.surfaceContainerLow
             )
-            Text(
-                text = "${state.result}",
-                color = Color.Gray,
 
-                style = TextStyle(fontSize = 42.sp, fontWeight = FontWeight.SemiBold)
+            Text(
+                text = "= ${state.result}",
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                modifier = Modifier
+                    .padding(end = 16.dp)
+                    .align(Alignment.End),
+                style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold)
             )
+
+            // Top Row Icons: History + Theme toggle
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 60.dp, start = 16.dp, end = 16.dp, bottom = 19.dp),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Icon(
+                    imageVector = if (showHistory) Icons.Filled.Calculate else Icons.Default.History,
+                    contentDescription = "Toggle History",
+                    modifier = Modifier
+                        .size(35.dp)
+                        .clip(CircleShape)
+                        .clickable { showHistory = !showHistory },
+                    tint = MaterialTheme.colorScheme.inversePrimary
+                )
+
+                Icon(
+                    imageVector = if (isDarkMode) Icons.Filled.LightMode else Icons.Default.DarkMode, // use real theme icon here
+                    contentDescription = "Toggle Theme",
+                    modifier = Modifier
+                        .padding(start = 16.dp)
+                        .size(35.dp)
+
+                        .clip(CircleShape)
+                        .clickable { onToggleTheme() },
+                    tint = MaterialTheme.colorScheme.inversePrimary
+                )
+            }
+
             Divider(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 50.dp),
-                thickness = 2.dp,
-                color = Color(0xBEE7E7E7)
+                    .padding(bottom = 10.dp),
+                thickness = 0.5.dp,
+                color = MaterialTheme.colorScheme.inverseSurface
             )
 
-
-
-            ButtonPad(viewModel)
+            ButtonPad(viewModel1)
         }
     }
+
+    if (showHistory) {
+        History(history = history, isDarkMode = isDarkMode)
+    }
 }
+
+
+
+
 
 
 

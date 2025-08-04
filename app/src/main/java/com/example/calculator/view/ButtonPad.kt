@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,7 +20,7 @@ import com.example.calculator.viewmodel.CalculatorViewModel
 @Composable
 fun ButtonPad(viewModel: CalculatorViewModel) {
     Column(
-        modifier = Modifier.fillMaxSize().background(Color.White).padding(bottom = 12.dp),
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -45,16 +46,16 @@ fun ButtonPad(viewModel: CalculatorViewModel) {
                                 onClick = { viewModel.onAction(labels[itemIndex]) },
 //                              BACKGROUNG-COLOR
                                 background = if (C) Color(0xFFFFC347)
-                                else if (Skin) Color(0xFFF5F0E4)
-                                else if (LightBlue) Color(0xFFE1D5E9)
+                                else if (Skin) MaterialTheme.colorScheme.background
+                                else if (LightBlue) MaterialTheme.colorScheme.outline
                                 else Color.White,
                                 shadowColor = if (C) Color(0xFFECA101)
-                                else if (Skin) Color(0xFFA99777)
-                                else if (LightBlue) Color(0xFF764CC7)
+                                else if (Skin) MaterialTheme.colorScheme.onSurface
+                                else if (LightBlue) MaterialTheme.colorScheme.outlineVariant
                                 else Color.Black,
                                 TextColor = if (C) Color.White
-                                else if (Skin) Color(0xFFB4935E)
-                                else if (LightBlue) Color(0xFF682E85)
+                                else if (Skin) MaterialTheme.colorScheme.onBackground
+                                else if (LightBlue) MaterialTheme.colorScheme.onError
                                 else Color.Black,
                                 width = 84.dp,
                                 height = 74.dp,
@@ -92,13 +93,13 @@ fun ButtonPad(viewModel: CalculatorViewModel) {
                                     text = labels2[itemIndex],
                                     onClick = { viewModel.onAction(labels2[itemIndex]) },
                                     width = 84.dp,
-                                    background = if (White) Color(0xFFFFFFFF)
-                                    else if (isEquals2) Color(0xBEFFFFFF)
+                                    background = if (White) MaterialTheme.colorScheme.onSecondaryContainer
+                                    else if (isEquals2) MaterialTheme.colorScheme.secondaryContainer
                                     else Color.White,
-                                    TextColor = if (White) Color(0xFF5D7A8A)
-                                    else if (isEquals2) Color(0xFF7C7575)
+                                    TextColor = if (White) MaterialTheme.colorScheme.secondary
+                                    else if (isEquals2) MaterialTheme.colorScheme.surfaceDim
                                     else Color.Black,
-                                    shadowColor = if (White) Color(0xF7B0B0B0)
+                                    shadowColor = if (White) Color(0x4F939292)
                                     else if (isEquals2) Color(0xFF6C6C6C)
                                     else Color.White,
                                     height = 74.dp,
@@ -127,17 +128,17 @@ fun ButtonPad(viewModel: CalculatorViewModel) {
 
 
                                     modifier = Modifier,
-                                    background = if (Blue) Color(0xFFE1D5E9)
-                                    else if (isEquals) Color(0xFF9228E2)
+                                    background = if (Blue) MaterialTheme.colorScheme.outline
+                                    else if (isEquals) MaterialTheme.colorScheme.surfaceBright
                                     else Color.White,
-                                    TextColor = if (Blue) Color(0xFF682E85)
+                                    TextColor = if (Blue) MaterialTheme.colorScheme.onError
                                     else if (isEquals) Color.White
                                     else Color.Black,
-                                    shadowColor = if (Blue) Color(0xFF7058A8)
-                                    else if (isEquals) Color(0xFF7058A8)
+                                    shadowColor = if (Blue) MaterialTheme.colorScheme.outlineVariant
+                                    else if (isEquals) Color(0xFF7861AD)
                                     else Color.White,
                                     height = if (isEquals) 162.dp else 74.dp,
-                                    width = 84.dp,
+                                    width = 78.dp,
 
 
                                     )
