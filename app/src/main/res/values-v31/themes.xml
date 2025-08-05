@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Calculator" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- Disable default splash background -->
+        <item name="android:windowBackground">@android:color/transparent</item>
+
+        <!-- Disable splash icon (Android 12+) -->
+        <item name="android:windowSplashScreenAnimatedIcon">@null</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@null</item>
+        <item name="android:windowSplashScreenBackground">@null</item>
+    </style>
+</resources>

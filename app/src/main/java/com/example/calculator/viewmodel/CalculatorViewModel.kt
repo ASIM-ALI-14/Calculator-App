@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import net.objecthunter.exp4j.ExpressionBuilder
 import net.objecthunter.exp4j.function.Function
+import kotlin.math.sqrt
 
 class CalculatorViewModel : ViewModel() {
 
@@ -41,16 +42,17 @@ class CalculatorViewModel : ViewModel() {
             }
 
             "√" -> {
-                val newExpr = currentState.expression + "sqrt("
-                _state.value = currentState.copy(expression = newExpr)
+                if (!currentState.expression.endsWith("sqrt(")) {
+                    val newExpr = currentState.expression + "sqrt("
+                    _state.value = currentState.copy(expression = newExpr)
+                }
             }
 
             "x²" -> {
                 val current = currentState.expression
-                if (current.isNotEmpty()) {
+                if (current.isNotEmpty() && !current.endsWith("^2")) {
                     val newExpr = "($current)^2"
                     _state.value = currentState.copy(expression = newExpr)
-                    // force re-evaluation even if ending with ^2
                     try {
                         val exp = newExpr
                             .replace("x", "*")
@@ -65,17 +67,23 @@ class CalculatorViewModel : ViewModel() {
                 }
             }
 
-
             else -> {
                 val isOperator = input in listOf("+", "-", "x", "÷", "*", "/")
 
-                // ✅ Count only digits in the expression
-                val digitCount = currentState.expression.count { it.isDigit() }
-
-                // ✅ Prevent adding more than 30 digits
-                if (input.all { it.isDigit() } && digitCount >= 20) {
-                    return
+                if (input.first().isDigit()) {
+                    val lastNumber = currentState.expression.takeLastWhile { it.isDigit() || it == '.' }
+                    if (lastNumber.length >= 15) return
                 }
+
+
+                val lastChar = currentState.expression.lastOrNull()
+                val lastIsOperator = lastChar != null && lastChar.toString() in listOf("+", "-", "x", "÷", "*", "/")
+                if (isOperator && lastIsOperator) return
+
+                val specialOperators = listOf("√", "%", "x²","(",")")
+                val lastInput = currentState.expression.takeLast(2)
+                val endsWithSpecial = specialOperators.any { lastInput.endsWith(it) }
+                if (input in specialOperators && endsWithSpecial) return
 
                 val newExpression = when {
                     justEvaluated && input.first().isDigit() -> {
@@ -123,7 +131,6 @@ class CalculatorViewModel : ViewModel() {
                 .let { autoCloseParentheses(it) }
 
             val result = evalExpression(rawExpression)
-
             val historyItem = currentState.expression to result
 
             _state.value = currentState.copy(
@@ -147,11 +154,10 @@ class CalculatorViewModel : ViewModel() {
         val lastChar = expression.last()
         val endsCorrectly = lastChar.isDigit() || lastChar == ')'
 
-        val shouldEvaluate =
-            endsCorrectly && (
-                    expression.contains(Regex("[+\\-*/÷x^]")) ||
-                            expression.contains("sqrt(")
-                    )
+        val shouldEvaluate = endsCorrectly && (
+                expression.contains(Regex("[+\\-*/÷x^]")) ||
+                        expression.contains("sqrt(")
+                )
 
         if (shouldEvaluate) {
             try {
@@ -173,7 +179,7 @@ class CalculatorViewModel : ViewModel() {
     private fun evalExpression(expression: String): String {
         val sqrtFunction = object : Function("sqrt", 1) {
             override fun apply(vararg args: Double): Double {
-                return kotlin.math.sqrt(args[0])
+                return sqrt(args[0])
             }
         }
 

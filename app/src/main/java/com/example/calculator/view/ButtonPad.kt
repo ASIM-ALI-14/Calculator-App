@@ -13,12 +13,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.example.calculator.viewmodel.CalculatorViewModel
 
 
 @Composable
 fun ButtonPad(viewModel: CalculatorViewModel) {
+    val context = LocalContext.current
+    val view = LocalView.current
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Bottom,
@@ -43,7 +47,8 @@ fun ButtonPad(viewModel: CalculatorViewModel) {
                             val LightBlue = labels[itemIndex] in listOf("÷", "x")
                             SingleButton(
                                 text = labels[itemIndex],
-                                onClick = { viewModel.onAction(labels[itemIndex]) },
+                                onClick = {  performHapticAndSound(context, view)
+                                    viewModel.onAction(labels[itemIndex]) },
 //                              BACKGROUNG-COLOR
                                 background = if (C) Color(0xFFFFC347)
                                 else if (Skin) MaterialTheme.colorScheme.background
@@ -91,7 +96,8 @@ fun ButtonPad(viewModel: CalculatorViewModel) {
                                 val isEquals2 = labels2[itemIndex] == "⌫"
                                 SingleButton(
                                     text = labels2[itemIndex],
-                                    onClick = { viewModel.onAction(labels2[itemIndex]) },
+                                    onClick = {  performHapticAndSound(context, view)
+                                        viewModel.onAction(labels2[itemIndex])},
                                     width = 84.dp,
                                     background = if (White) MaterialTheme.colorScheme.onSecondaryContainer
                                     else if (isEquals2) MaterialTheme.colorScheme.secondaryContainer
@@ -124,7 +130,8 @@ fun ButtonPad(viewModel: CalculatorViewModel) {
 
                                 SingleButton(
                                     text = labels3[itemIndex],
-                                    onClick = { viewModel.onAction(labels3[itemIndex]) },
+                                    onClick = {  performHapticAndSound(context, view)
+                                        viewModel.onAction(labels3[itemIndex])},
 
 
                                     modifier = Modifier,
