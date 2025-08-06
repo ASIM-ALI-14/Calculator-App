@@ -28,7 +28,7 @@ private val DarkColorScheme = darkColorScheme(
     surfaceBright = Color(0xFFA965E1),
     inverseSurface = Color(0xBE575757),
     inversePrimary = Color(0xFC6F6F70),
-    surfaceContainerLow = Color(0xFF585A5B),
+    surfaceContainerLow = Color(0xFFDEDBDB),
     surfaceContainerHigh = Color(0xFFBABDBD),
             errorContainer = Color(0xFA101010)
 
@@ -50,7 +50,7 @@ private val LightColorScheme = lightColorScheme(
     surfaceBright = Color(0xFF9228E2),
     inverseSurface = Color(0xBE4D4C4C),
     inversePrimary = Color(0xFC4B4B4B),
-    surfaceContainerLow = Color(0xFFA3A5A8),
+    surfaceContainerLow = Color(0xFF1C1C1C),
     surfaceContainerHigh = Color(0xFF5E6B70),
     errorContainer = Color(0xBE858484)
 

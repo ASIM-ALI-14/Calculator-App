@@ -1,9 +1,10 @@
 package com.example.calculator.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.calculator.model.CalculatorState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import net.objecthunter.exp4j.ExpressionBuilder
 import net.objecthunter.exp4j.function.Function
 import kotlin.math.sqrt
@@ -15,6 +16,9 @@ class CalculatorViewModel : ViewModel() {
 
     private val _history = MutableStateFlow<List<Pair<String, String>>>(emptyList())
     val history = _history.asStateFlow()
+
+    private val _errorFlow = MutableSharedFlow<String>()
+    val errorFlow = _errorFlow.asSharedFlow()
 
     private var justEvaluated = false
 
@@ -71,16 +75,17 @@ class CalculatorViewModel : ViewModel() {
                 val isOperator = input in listOf("+", "-", "x", "÷", "*", "/")
 
                 if (input.first().isDigit()) {
-                    val lastNumber = currentState.expression.takeLastWhile { it.isDigit() || it == '.' }
+                    val lastNumber =
+                        currentState.expression.takeLastWhile { it.isDigit() || it == '.' }
                     if (lastNumber.length >= 15) return
                 }
 
-
                 val lastChar = currentState.expression.lastOrNull()
-                val lastIsOperator = lastChar != null && lastChar.toString() in listOf("+", "-", "x", "÷", "*", "/")
+                val lastIsOperator =
+                    lastChar != null && lastChar.toString() in listOf("+", "-", "x", "÷", "*", "/")
                 if (isOperator && lastIsOperator) return
 
-                val specialOperators = listOf("√", "%", "x²","(",")")
+                val specialOperators = listOf("√", "%", "x²", "(", ")")
                 val lastInput = currentState.expression.takeLast(2)
                 val endsWithSpecial = specialOperators.any { lastInput.endsWith(it) }
                 if (input in specialOperators && endsWithSpecial) return
@@ -143,8 +148,13 @@ class CalculatorViewModel : ViewModel() {
             justEvaluated = true
 
         } catch (e: Exception) {
-            _state.value = _state.value.copy(result = "Error")
+            _state.value = _state.value.copy(result = "")
             justEvaluated = false
+
+            // 🔥 Emit toast event for error
+            viewModelScope.launch {
+                _errorFlow.emit("Invalid Expression")
+            }
         }
     }
 
@@ -168,8 +178,11 @@ class CalculatorViewModel : ViewModel() {
 
                 val result = evalExpression(exp)
                 _state.value = _state.value.copy(result = result)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
                 _state.value = _state.value.copy(result = "")
+                viewModelScope.launch {
+                    _errorFlow.emit("Invalid Expression")
+                }
             }
         } else {
             _state.value = _state.value.copy(result = "")

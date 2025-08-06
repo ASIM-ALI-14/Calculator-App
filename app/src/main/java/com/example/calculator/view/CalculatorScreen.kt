@@ -1,5 +1,6 @@
 package com.example.calculator.view
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -55,6 +56,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calculator.viewmodel.CalculatorViewModel
 
 
@@ -84,6 +86,14 @@ fun CalculatorScreen(
     val history by viewModel1.history.collectAsState()
     var showHistory by rememberSaveable { mutableStateOf(false) }
 
+    val viewModel: CalculatorViewModel = viewModel()
+
+    LaunchedEffect(Unit) {
+        viewModel.errorFlow.collect { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -92,11 +102,11 @@ fun CalculatorScreen(
                 .fillMaxWidth()
         ) {
             val expressionFontSize = when {
-                state.expression.length > 40 -> 29.sp
-                state.expression.length > 34 -> 24.sp
-                state.expression.length > 28 -> 30.sp
-                state.expression.length > 16 -> 32.sp
-                else -> 36.sp // 👈 default font size for short expressions
+                state.expression.length > 40 -> 26.sp
+                state.expression.length > 34 -> 29.sp
+                state.expression.length > 28 -> 32.sp
+                state.expression.length > 16 -> 36.sp
+                else -> 40.sp // 👈 default font size for short expressions
             }
 
             // Expression + Result
